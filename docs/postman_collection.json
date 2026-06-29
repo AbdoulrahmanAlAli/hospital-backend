@@ -1,0 +1,1533 @@
+{
+  "info": {
+    "name": "Hospital Management Backend - Complete API Collection",
+    "description": "Complete organized Postman collection for the Hospital Management Backend. Run Auth/Login first, then create Doctor, Patient, Medicine, and the rest of resources as needed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "serverUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1"
+    },
+    {
+      "key": "managerEmail",
+      "value": "manager@hospital.local"
+    },
+    {
+      "key": "managerPassword",
+      "value": "Admin@123456"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "currentUserId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "doctorId",
+      "value": ""
+    },
+    {
+      "key": "doctorUserId",
+      "value": ""
+    },
+    {
+      "key": "staffId",
+      "value": ""
+    },
+    {
+      "key": "staffUserId",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": ""
+    },
+    {
+      "key": "patientUserId",
+      "value": ""
+    },
+    {
+      "key": "testId",
+      "value": ""
+    },
+    {
+      "key": "prescriptionId",
+      "value": ""
+    },
+    {
+      "key": "appointmentId",
+      "value": ""
+    },
+    {
+      "key": "billingId",
+      "value": ""
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "medicineId",
+      "value": ""
+    },
+    {
+      "key": "inventoryItemId",
+      "value": ""
+    },
+    {
+      "key": "equipmentId",
+      "value": ""
+    },
+    {
+      "key": "shiftId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Health & Documentation",
+      "description": "",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{serverUrl}}/health",
+            "description": "Check that the API server is running.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{serverUrl}}/api-docs",
+            "description": "Open API documentation page in browser/Postman.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Authentication",
+      "description": "",
+      "item": [
+        {
+          "name": "Login - Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login with seeded manager account and save access/refresh tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{managerEmail}}\",\n  \"password\": \"{{managerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.accessToken) pm.collectionVariables.set(\"accessToken\", json.data.accessToken);",
+                  "if (json?.data?.refreshToken) pm.collectionVariables.set(\"refreshToken\", json.data.refreshToken);",
+                  "if (json?.data?.user?.id) pm.collectionVariables.set(\"currentUserId\", json.data.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "description": "Refresh JWT tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.accessToken) pm.collectionVariables.set(\"accessToken\", json.data.accessToken);",
+                  "if (json?.data?.refreshToken) pm.collectionVariables.set(\"refreshToken\", json.data.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Get authenticated user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/change-password",
+            "description": "Change authenticated user password. Use carefully because it changes the real password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin@123456\",\n  \"newPassword\": \"Admin@1234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Users",
+      "description": "",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users?page=1&limit=10&search=",
+            "description": "Manager/Admin: list users with pagination and search."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/users",
+            "description": "Manager/Admin: create any user role.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API User\",\n  \"email\": \"api.user@example.com\",\n  \"phone\": \"+963900000001\",\n  \"password\": \"Password@123\",\n  \"role\": \"staff\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"userId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API User Updated\",\n  \"phone\": \"+963900000002\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Doctors",
+      "description": "",
+      "item": [
+        {
+          "name": "List Doctors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/doctors?page=1&limit=10&search=",
+            "description": "List doctors."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Doctor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/doctors",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"name\": \"Dr. Ahmad Hassan\",\n    \"email\": \"doctor.ahmad@example.com\",\n    \"phone\": \"+963900100100\",\n    \"password\": \"Doctor@123\"\n  },\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"DOC-1001\",\n  \"roomNumber\": \"A-203\",\n  \"biography\": \"Senior cardiology doctor\",\n  \"available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?._id) pm.collectionVariables.set(\"doctorId\", json.data._id);",
+                  "if (json?.data?.user?._id) pm.collectionVariables.set(\"doctorUserId\", json.data.user._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Doctor By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/doctors/{{doctorId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/doctors/{{doctorId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"specialization\": \"Cardiology\",\n  \"roomNumber\": \"A-204\",\n  \"available\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/doctors/{{doctorId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Staff / Admin",
+      "description": "",
+      "item": [
+        {
+          "name": "List Staff",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/staff?page=1&limit=10&search=",
+            "description": "Manager/Admin: list staff records."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/staff",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"name\": \"Nurse Lina\",\n    \"email\": \"staff.lina@example.com\",\n    \"phone\": \"+963900200200\",\n    \"password\": \"Staff@123\",\n    \"role\": \"staff\"\n  },\n  \"position\": \"Nurse\",\n  \"department\": \"Emergency\",\n  \"hireDate\": \"2026-06-29T09:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?._id) pm.collectionVariables.set(\"staffId\", json.data._id);",
+                  "if (json?.data?.user?._id) pm.collectionVariables.set(\"staffUserId\", json.data.user._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Staff By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/staff/{{staffId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/staff/{{staffId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Senior Nurse\",\n  \"department\": \"Emergency\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Staff",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/staff/{{staffId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Patients",
+      "description": "",
+      "item": [
+        {
+          "name": "List Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/patients?page=1&limit=10&search=&archived=false",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userAccount\": {\n    \"email\": \"patient.ali@example.com\",\n    \"password\": \"Patient@123\",\n    \"name\": \"Ali Patient\",\n    \"phone\": \"+963900300300\"\n  },\n  \"fullName\": \"Ali Patient\",\n  \"nationalId\": \"SY-123456\",\n  \"phone\": \"+963900300300\",\n  \"email\": \"patient.ali@example.com\",\n  \"gender\": \"male\",\n  \"birthDate\": \"1998-01-10T00:00:00.000Z\",\n  \"address\": \"Damascus\",\n  \"bloodType\": \"O+\",\n  \"assignedDoctor\": \"{{doctorId}}\",\n  \"allergies\": [\n    \"Penicillin\"\n  ],\n  \"chronicDiseases\": [\n    \"Asthma\"\n  ],\n  \"emergencyContact\": {\n    \"name\": \"Mohammad Patient\",\n    \"phone\": \"+963900300301\",\n    \"relation\": \"Brother\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?._id) pm.collectionVariables.set(\"patientId\", json.data._id);",
+                  "if (json?.data?.user) pm.collectionVariables.set(\"patientUserId\", json.data.user);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Patient By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients/{{patientId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Damascus - Updated\",\n  \"bloodType\": \"O+\",\n  \"allergies\": [\n    \"Penicillin\",\n    \"Dust\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Patient",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/archive",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Medical Tests / Patient Analysis PDFs",
+      "description": "",
+      "item": [
+        {
+          "name": "List Patient Tests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patient Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests",
+            "description": "Doctor only. Doctor must be the assigned doctor for the patient.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"CBC Analysis\",\n  \"type\": \"Blood Test\",\n  \"resultSummary\": \"Waiting for lab result\",\n  \"status\": \"requested\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"testId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Patient Test",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests/{{testId}}",
+            "description": "Doctor only.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultSummary\": \"Hemoglobin and WBC are within acceptable range\",\n  \"status\": \"in_progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Analysis PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests/{{testId}}/pdf",
+            "description": "Doctor only. Field name must be pdf. File is encrypted and stored in storage/analysis.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "pdf",
+                  "type": "file",
+                  "src": "/absolute/path/to/analysis.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Analysis PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests/{{testId}}/pdf",
+            "description": "Displays decrypted PDF inline. Doctors can view only their assigned patient test; patient can view own test."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient Test",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/tests/{{testId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Prescriptions",
+      "description": "",
+      "item": [
+        {
+          "name": "List Patient Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/prescriptions",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patient Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients/{{patientId}}/prescriptions",
+            "description": "Doctor only. Doctor must be assigned to patient.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diagnosis\": \"Seasonal allergy\",\n  \"medicines\": [\n    {\n      \"medicine\": \"{{medicineId}}\",\n      \"name\": \"Cetirizine\",\n      \"dosage\": \"10mg\",\n      \"frequency\": \"Once daily\",\n      \"duration\": \"7 days\",\n      \"instructions\": \"Take before sleep\"\n    }\n  ],\n  \"notes\": \"Follow up after one week\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"prescriptionId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Patient Prescription",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/patients/{{patientId}}/prescriptions/{{prescriptionId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes\",\n  \"medicines\": [\n    {\n      \"name\": \"Cetirizine\",\n      \"dosage\": \"10mg\",\n      \"frequency\": \"Once daily\",\n      \"duration\": \"5 days\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient Prescription",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/patients/{{patientId}}/prescriptions/{{prescriptionId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - Appointments",
+      "description": "",
+      "item": [
+        {
+          "name": "List Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/appointments?page=1&limit=10&status=&doctor={{doctorId}}&patient={{patientId}}&from=&to=",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/appointments",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient\": \"{{patientId}}\",\n  \"doctor\": \"{{doctorId}}\",\n  \"scheduledAt\": \"2026-07-01T10:00:00.000Z\",\n  \"durationMinutes\": 30,\n  \"reason\": \"Routine check\",\n  \"notes\": \"Bring previous reports\",\n  \"status\": \"pending\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"appointmentId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Appointment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"notes\": \"Confirmed by admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - Billing & Payments",
+      "description": "",
+      "item": [
+        {
+          "name": "List Billings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/billings?page=1&limit=10&status=&patient={{patientId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Billing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/billings",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient\": \"{{patientId}}\",\n  \"items\": [\n    {\n      \"description\": \"Doctor consultation\",\n      \"quantity\": 1,\n      \"unitPrice\": 25000\n    },\n    {\n      \"description\": \"CBC Analysis\",\n      \"quantity\": 1,\n      \"unitPrice\": 15000\n    }\n  ],\n  \"discount\": 5000,\n  \"status\": \"unpaid\",\n  \"notes\": \"Pay at reception\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"billingId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Billing By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/billings/{{billingId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Billing",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/billings/{{billingId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\",\n  \"paidAt\": \"2026-06-29T12:00:00.000Z\",\n  \"notes\": \"Paid in cash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Billing",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/billings/{{billingId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 - Notifications",
+      "description": "",
+      "item": [
+        {
+          "name": "My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/me?page=1&limit=10&read=false",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": \"{{currentUserId}}\",\n  \"title\": \"Administrative notice\",\n  \"message\": \"This is a test notification from Postman\",\n  \"type\": \"administrative\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"notificationId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark Notification As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/{{notificationId}}/read",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 - Medicines",
+      "description": "",
+      "item": [
+        {
+          "name": "List Medicines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/medicines?page=1&limit=10&search=",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/medicines",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cetirizine\",\n  \"code\": \"MED-CET-10\",\n  \"category\": \"Antihistamine\",\n  \"manufacturer\": \"Generic Pharma\",\n  \"description\": \"Allergy medicine\",\n  \"unit\": \"box\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"medicineId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Medicine By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/medicines/{{medicineId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Medicine",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/medicines/{{medicineId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manufacturer\": \"Updated Pharma\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Medicine",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/medicines/{{medicineId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 - Inventory",
+      "description": "",
+      "item": [
+        {
+          "name": "Low Stock Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/inventory/low-stock",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "List Inventory Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/inventory?page=1&limit=10&search=",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Inventory Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/inventory",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medicine\": \"{{medicineId}}\",\n  \"quantity\": 100,\n  \"minimumQuantity\": 20,\n  \"batchNumber\": \"BATCH-001\",\n  \"expiryDate\": \"2027-01-01T00:00:00.000Z\",\n  \"location\": \"Main pharmacy\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"inventoryItemId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Inventory Item By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/inventory/{{inventoryItemId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Inventory Item",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/inventory/{{inventoryItemId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 15,\n  \"minimumQuantity\": 20,\n  \"location\": \"Main pharmacy - Shelf 2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Inventory Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/inventory/{{inventoryItemId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 - Equipment",
+      "description": "",
+      "item": [
+        {
+          "name": "List Equipment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/equipment?page=1&limit=10&search=",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Equipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/equipment",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ECG Machine\",\n  \"code\": \"EQ-ECG-001\",\n  \"category\": \"Cardiology\",\n  \"quantity\": 3,\n  \"availableQuantity\": 2,\n  \"status\": \"available\",\n  \"location\": \"Cardiology department\",\n  \"notes\": \"Ready to use\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"equipmentId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Equipment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/equipment/{{equipmentId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Equipment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/equipment/{{equipmentId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"availableQuantity\": 1,\n  \"status\": \"in_use\",\n  \"notes\": \"One unit currently used\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Equipment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/equipment/{{equipmentId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14 - Shifts",
+      "description": "",
+      "item": [
+        {
+          "name": "List Shifts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/shifts?page=1&limit=10&search=",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create Shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/shifts",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor\": \"{{doctorId}}\",\n  \"startsAt\": \"2026-07-01T08:00:00.000Z\",\n  \"endsAt\": \"2026-07-01T16:00:00.000Z\",\n  \"department\": \"Emergency\",\n  \"notes\": \"Morning shift\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set(\"shiftId\", json.data && json.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Shift By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/shifts/{{shiftId}}",
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update Shift",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/shifts/{{shiftId}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department\": \"Emergency\",\n  \"notes\": \"Updated shift notes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Shift",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/shifts/{{shiftId}}",
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
