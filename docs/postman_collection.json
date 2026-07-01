@@ -435,7 +435,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"specialization\": \"Cardiology\",\n  \"roomNumber\": \"A-204\",\n  \"available\": true\n}",
+              "raw": "{\n  \"user\": {\n    \"name\": \"Dr. Ahmad Hassan Updated\",\n    \"email\": \"doctor.updated@example.com\",\n    \"phone\": \"+963944444444\",\n    \"isActive\": true\n  },\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"DOC-UPDATED-001\",\n  \"roomNumber\": \"A-204\",\n  \"biography\": \"Updated doctor profile\",\n  \"available\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -532,7 +532,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"position\": \"Senior Nurse\",\n  \"department\": \"Emergency\"\n}",
+              "raw": "{\n  \"user\": {\n    \"name\": \"Updated Staff Name\",\n    \"email\": \"staff.updated@example.com\",\n    \"phone\": \"+963955555555\",\n    \"isActive\": true\n  },\n  \"position\": \"Senior Nurse\",\n  \"department\": \"Emergency\",\n  \"hireDate\": \"2026-01-01T00:00:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

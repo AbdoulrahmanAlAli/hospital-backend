@@ -8,6 +8,27 @@ import { sendSuccess } from '../utils/apiResponse';
 import { buildSearchFilter, getPagination } from '../utils/query';
 import { writeAuditLog } from '../middlewares/audit.middleware';
 
+const editableUserSchema = z.object({
+  name: z.string().min(2).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  password: z.string().min(8).optional(),
+  isActive: z.boolean().optional()
+});
+
+const userFieldNames = ['name', 'email', 'phone', 'password', 'isActive'] as const;
+const staffFieldNames = ['position', 'department', 'hireDate'] as const;
+
+const pickDefined = <T extends readonly string[]>(source: Record<string, unknown>, fields: T): Partial<Record<T[number], unknown>> => {
+  const picked: Record<string, unknown> = {};
+  for (const field of fields) {
+    if (Object.prototype.hasOwnProperty.call(source, field) && source[field] !== undefined) {
+      picked[field] = source[field];
+    }
+  }
+  return picked as Partial<Record<T[number], unknown>>;
+};
+
 export const createStaffSchema = z.object({
   body: z.object({
     user: z.object({
@@ -25,6 +46,12 @@ export const createStaffSchema = z.object({
 
 export const updateStaffSchema = z.object({
   body: z.object({
+    user: editableUserSchema.optional(),
+    name: z.string().min(2).optional(),
+    email: z.string().email().optional(),
+    phone: z.string().optional(),
+    password: z.string().min(8).optional(),
+    isActive: z.boolean().optional(),
     position: z.string().min(2).optional(),
     department: z.string().optional(),
     hireDate: z.string().datetime().optional()
@@ -59,10 +86,37 @@ export const createStaff = asyncHandler(async (req, res) => {
 });
 
 export const updateStaff = asyncHandler(async (req, res) => {
-  const staff = await StaffModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).populate('user', '-password');
+  const staff = await StaffModel.findById(req.params.id);
   if (!staff) throw new ApiError(404, 'Staff not found');
+
+  const body = req.body as Record<string, unknown>;
+  const staffUpdates = pickDefined(body, staffFieldNames);
+
+  const nestedUserUpdates = typeof body.user === 'object' && body.user !== null
+    ? (body.user as Record<string, unknown>)
+    : {};
+  const directUserUpdates = pickDefined(body, userFieldNames);
+  const userUpdates = { ...nestedUserUpdates, ...directUserUpdates };
+
+  if (Object.keys(staffUpdates).length === 0 && Object.keys(userUpdates).length === 0) {
+    throw new ApiError(400, 'No valid staff or linked user fields were provided for update');
+  }
+
+  if (Object.keys(staffUpdates).length > 0) {
+    staff.set(staffUpdates);
+    await staff.save();
+  }
+
+  if (Object.keys(userUpdates).length > 0) {
+    const user = await UserModel.findById(staff.user).select('+password');
+    if (!user) throw new ApiError(404, 'Linked user account not found');
+    Object.assign(user, userUpdates);
+    await user.save();
+  }
+
   await writeAuditLog(req, 'update', 'Staff', req.params.id);
-  return sendSuccess(res, staff, 'Staff updated successfully');
+  const populated = await StaffModel.findById(staff._id).populate('user', '-password');
+  return sendSuccess(res, populated, 'Staff updated successfully');
 });
 
 export const deleteStaff = asyncHandler(async (req, res) => {
