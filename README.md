@@ -241,3 +241,32 @@ GET    /api/v1/notifications/me
 - خزن `storage/analysis` في Volume دائم عند Docker أو السيرفر.
 - لا ترفع `.env` أو ملفات `storage/analysis/*.enc` إلى Git.
 - يمكن لاحقاً ربط التخزين بـ S3 أو MinIO مع الحفاظ على نفس منطق التشفير.
+
+
+## Staff role classification
+
+Staff users still use the main auth role `staff`. The staff profile now includes `staffRole` to classify the employee job type. Staff list can be filtered using `GET /api/v1/staff?staffRole=receptionist`.
+
+Allowed `staffRole` values:
+
+- `doctor_assistant`
+- `receptionist`
+- `cleaner`
+- `data_entry`
+- `accountant`
+- `nurse`
+- `pharmacist`
+- `lab_staff`
+- `admin_assistant`
+- `other`
+
+Example:
+
+```json
+{
+  "position": "Nurse",
+  "staffRole": "nurse",
+  "department": "Emergency"
+}
+```
+

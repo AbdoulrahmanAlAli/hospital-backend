@@ -466,7 +466,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/staff?page=1&limit=10&search=",
+            "url": "{{baseUrl}}/staff?page=1&limit=10&search=&staffRole=",
             "description": "Manager/Admin: list staff records."
           },
           "response": []

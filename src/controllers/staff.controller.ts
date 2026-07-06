@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Roles } from '../constants/roles';
+import { staffRoleValues } from '../constants/staffRoles';
 import { StaffModel } from '../models/Staff.model';
 import { UserModel } from '../models/User.model';
 import { ApiError } from '../utils/ApiError';
@@ -17,7 +18,7 @@ const editableUserSchema = z.object({
 });
 
 const userFieldNames = ['name', 'email', 'phone', 'password', 'isActive'] as const;
-const staffFieldNames = ['position', 'department', 'hireDate'] as const;
+const staffFieldNames = ['position', 'staffRole', 'department', 'hireDate'] as const;
 
 const pickDefined = <T extends readonly string[]>(source: Record<string, unknown>, fields: T): Partial<Record<T[number], unknown>> => {
   const picked: Record<string, unknown> = {};
@@ -39,6 +40,7 @@ export const createStaffSchema = z.object({
       role: z.enum([Roles.ADMIN, Roles.STAFF]).optional()
     }),
     position: z.string().min(2),
+    staffRole: z.enum(staffRoleValues).optional().default('other'),
     department: z.string().optional(),
     hireDate: z.string().datetime().optional()
   })
@@ -53,6 +55,7 @@ export const updateStaffSchema = z.object({
     password: z.string().min(8).optional(),
     isActive: z.boolean().optional(),
     position: z.string().min(2).optional(),
+    staffRole: z.enum(staffRoleValues).optional(),
     department: z.string().optional(),
     hireDate: z.string().datetime().optional()
   })
@@ -60,7 +63,10 @@ export const updateStaffSchema = z.object({
 
 export const listStaff = asyncHandler(async (req, res) => {
   const { page, limit, skip, sort } = getPagination(req.query);
-  const filter = buildSearchFilter(req.query.search, ['position', 'department']);
+  const filter = buildSearchFilter(req.query.search, ['position', 'staffRole', 'department']);
+  if (typeof req.query.staffRole === 'string' && staffRoleValues.includes(req.query.staffRole as any)) {
+    filter.staffRole = req.query.staffRole;
+  }
   const [items, total] = await Promise.all([
     StaffModel.find(filter).populate('user', '-password').sort(sort).skip(skip).limit(limit),
     StaffModel.countDocuments(filter)

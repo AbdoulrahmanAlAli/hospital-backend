@@ -62,3 +62,31 @@ The database stores only metadata:
 ## Password Security
 
 Passwords are hashed with bcrypt using 12 salt rounds in `src/utils/password.ts`.
+
+
+## Staff Roles
+
+Staff records support a `staffRole` field in addition to the main user role `staff`. You can also filter staff list using `GET /api/v1/staff?staffRole=receptionist`.
+
+Allowed values:
+
+- `doctor_assistant`
+- `receptionist`
+- `cleaner`
+- `data_entry`
+- `accountant`
+- `nurse`
+- `pharmacist`
+- `lab_staff`
+- `admin_assistant`
+- `other`
+
+Example create/update body:
+
+```json
+{
+  "position": "Nurse",
+  "staffRole": "nurse",
+  "department": "Emergency"
+}
+```
