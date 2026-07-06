@@ -90,3 +90,31 @@ Example create/update body:
   "department": "Emergency"
 }
 ```
+
+
+## Prescriptions General API
+
+A general prescriptions endpoint was added for dashboard/admin views:
+
+```http
+GET /api/v1/prescriptions
+GET /api/v1/prescriptions/:id
+```
+
+Access behavior:
+
+- `manager`, `admin`, and `staff`: can view all prescriptions.
+- `doctor`: can view only prescriptions created by the logged-in doctor.
+- `patient`: can view only prescriptions linked to the logged-in patient profile.
+
+Optional filters for management/staff roles:
+
+```http
+GET /api/v1/prescriptions?page=1&limit=10&patient=PATIENT_ID&doctor=DOCTOR_ID&from=2026-01-01&to=2026-12-31
+```
+
+The patient-specific endpoint remains available for patient profile pages:
+
+```http
+GET /api/v1/patients/:patientId/prescriptions
+```

@@ -11,6 +11,7 @@ import medicineRoutes from './medicine.routes';
 import inventoryRoutes from './inventory.routes';
 import equipmentRoutes from './equipment.routes';
 import shiftRoutes from './shift.routes';
+import prescriptionRoutes from './prescription.routes';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/medicines', medicineRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/equipment', equipmentRoutes);
 router.use('/shifts', shiftRoutes);
+router.use('/prescriptions', prescriptionRoutes);
 
 export default router;

@@ -784,6 +784,26 @@
       "description": "",
       "item": [
         {
+          "name": "List All Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/prescriptions?page=1&limit=10&patient=&doctor=&from=&to=",
+            "description": "Admin/manager/staff can list all prescriptions. Doctor sees own prescriptions. Patient sees own prescriptions. Optional filters: patient, doctor, from, to."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Prescription By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/prescriptions/{{prescriptionId}}",
+            "description": "Get one prescription by id. Admin/manager/staff can view any. Doctor can view own. Patient can view own."
+          },
+          "response": []
+        },
+        {
           "name": "List Patient Prescriptions",
           "request": {
             "method": "GET",
