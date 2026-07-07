@@ -118,3 +118,24 @@ The patient-specific endpoint remains available for patient profile pages:
 ```http
 GET /api/v1/patients/:patientId/prescriptions
 ```
+# Doctor name populate update
+
+Updated responses that include doctors so they return the doctor id and the linked user data, including name.
+
+Example response shape:
+
+```json
+{
+  "assignedDoctor": {
+    "_id": "DOCTOR_ID",
+    "name": "Dr. Ahmad",
+    "user": {
+      "_id": "USER_ID",
+      "name": "Dr. Ahmad",
+      "email": "doctor@example.com",
+      "phone": "+963..."
+    },
+    "specialization": "Cardiology"
+  }
+}
+```

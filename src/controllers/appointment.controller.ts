@@ -25,6 +25,17 @@ export const updateAppointmentSchema = z.object({
   body: createAppointmentSchema.shape.body.partial()
 });
 
+
+const patientPopulate = {
+  path: 'patient',
+  populate: { path: 'user', select: 'name email phone' }
+};
+
+const doctorPopulate = {
+  path: 'doctor',
+  populate: { path: 'user', select: 'name email phone' }
+};
+
 const scopedAppointmentFilter = (req: any) => {
   if (req.user.role === Roles.DOCTOR) return { doctor: req.user.doctorId };
   if (req.user.role === Roles.PATIENT) return { patient: req.user.patientId };
@@ -45,7 +56,7 @@ export const listAppointments = asyncHandler(async (req, res) => {
   }
 
   const [items, total] = await Promise.all([
-    AppointmentModel.find(filter).populate('patient').populate('doctor').sort(sort).skip(skip).limit(limit),
+    AppointmentModel.find(filter).populate(patientPopulate).populate(doctorPopulate).sort(sort).skip(skip).limit(limit),
     AppointmentModel.countDocuments(filter)
   ]);
 
@@ -64,22 +75,27 @@ export const createAppointment = asyncHandler(async (req, res) => {
     });
   }
   await writeAuditLog(req, 'create', 'Appointment', appointment._id.toString());
-  return sendSuccess(res, appointment, 'Appointment created successfully', 201);
+  const populated = await AppointmentModel.findById(appointment._id).populate(patientPopulate).populate(doctorPopulate);
+  return sendSuccess(res, populated, 'Appointment created successfully', 201);
 });
 
 export const updateAppointment = asyncHandler(async (req, res) => {
   const appointment = await AppointmentModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   if (!appointment) throw new ApiError(404, 'Appointment not found');
   await writeAuditLog(req, 'update', 'Appointment', req.params.id);
-  return sendSuccess(res, appointment, 'Appointment updated successfully');
+  const populated = await AppointmentModel.findById(appointment._id).populate(patientPopulate).populate(doctorPopulate);
+  return sendSuccess(res, populated, 'Appointment updated successfully');
 });
 
 export const getAppointment = asyncHandler(async (req, res) => {
-  const appointment = await AppointmentModel.findById(req.params.id).populate('patient').populate('doctor');
+  const appointment = await AppointmentModel.findById(req.params.id).populate(patientPopulate).populate(doctorPopulate);
   if (!appointment) throw new ApiError(404, 'Appointment not found');
 
-  if (req.user?.role === Roles.DOCTOR && appointment.doctor.toString() !== req.user.doctorId) throw new ApiError(403, 'Forbidden');
-  if (req.user?.role === Roles.PATIENT && appointment.patient.toString() !== req.user.patientId) throw new ApiError(403, 'Forbidden');
+  const appointmentDoctorId = ((appointment.doctor as any)._id ?? appointment.doctor).toString();
+  const appointmentPatientId = ((appointment.patient as any)._id ?? appointment.patient).toString();
+
+  if (req.user?.role === Roles.DOCTOR && appointmentDoctorId !== req.user.doctorId) throw new ApiError(403, 'Forbidden');
+  if (req.user?.role === Roles.PATIENT && appointmentPatientId !== req.user.patientId) throw new ApiError(403, 'Forbidden');
 
   return sendSuccess(res, appointment, 'Appointment details');
 });

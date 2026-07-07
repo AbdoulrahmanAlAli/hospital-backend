@@ -26,10 +26,15 @@ export const updateMedicalTestSchema = z.object({
   body: createMedicalTestSchema.shape.body.partial()
 });
 
+const doctorPopulate = {
+  path: 'doctor',
+  populate: { path: 'user', select: 'name email phone' }
+};
+
 export const listPatientTests = asyncHandler(async (req, res) => {
   await ensureCanViewPatient(req, req.params.patientId);
   const tests = await MedicalTestModel.find({ patient: req.params.patientId })
-    .populate('doctor')
+    .populate(doctorPopulate)
     .sort('-createdAt');
   return sendSuccess(res, tests, 'Patient medical tests');
 });
@@ -42,7 +47,8 @@ export const createPatientTest = asyncHandler(async (req, res) => {
     doctor: req.user?.doctorId
   });
   await writeAuditLog(req, 'create', 'MedicalTest', test._id.toString());
-  return sendSuccess(res, test, 'Medical test created successfully', 201);
+  const populated = await MedicalTestModel.findById(test._id).populate(doctorPopulate);
+  return sendSuccess(res, populated, 'Medical test created successfully', 201);
 });
 
 export const updatePatientTest = asyncHandler(async (req, res) => {
@@ -54,7 +60,8 @@ export const updatePatientTest = asyncHandler(async (req, res) => {
   );
   if (!test) throw new ApiError(404, 'Medical test not found');
   await writeAuditLog(req, 'update', 'MedicalTest', test._id.toString());
-  return sendSuccess(res, test, 'Medical test updated successfully');
+  const populated = await MedicalTestModel.findById(test._id).populate(doctorPopulate);
+  return sendSuccess(res, populated, 'Medical test updated successfully');
 });
 
 export const uploadPatientTestPdf = asyncHandler(async (req, res) => {
@@ -93,7 +100,8 @@ export const uploadPatientTestPdf = asyncHandler(async (req, res) => {
   }
 
   await writeAuditLog(req, 'upload_pdf', 'MedicalTest', test._id.toString(), { encrypted: true, originalName: req.file.originalname });
-  return sendSuccess(res, test, 'Encrypted analysis PDF uploaded successfully');
+  const populated = await MedicalTestModel.findById(test._id).populate(doctorPopulate);
+  return sendSuccess(res, populated, 'Encrypted analysis PDF uploaded successfully');
 });
 
 export const viewPatientTestPdf = asyncHandler(async (req, res) => {

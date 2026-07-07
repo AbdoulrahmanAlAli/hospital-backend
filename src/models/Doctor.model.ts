@@ -21,6 +21,24 @@ const doctorSchema = new Schema<IDoctor>(
   { timestamps: true }
 );
 
+doctorSchema.virtual('name').get(function () {
+  const user = this.user as any;
+  return user && typeof user === 'object' ? user.name : undefined;
+});
+
+doctorSchema.virtual('email').get(function () {
+  const user = this.user as any;
+  return user && typeof user === 'object' ? user.email : undefined;
+});
+
+doctorSchema.virtual('phone').get(function () {
+  const user = this.user as any;
+  return user && typeof user === 'object' ? user.phone : undefined;
+});
+
+doctorSchema.set('toJSON', { virtuals: true });
+doctorSchema.set('toObject', { virtuals: true });
+
 doctorSchema.index({ specialization: 1, available: 1 });
 
 export const DoctorModel: Model<IDoctor> = mongoose.model<IDoctor>('Doctor', doctorSchema);

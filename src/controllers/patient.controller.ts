@@ -40,6 +40,12 @@ export const updatePatientSchema = z.object({
   body: createPatientSchema.shape.body.omit({ userAccount: true }).partial()
 });
 
+
+const assignedDoctorPopulate = {
+  path: 'assignedDoctor',
+  populate: { path: 'user', select: 'name email phone' }
+};
+
 const scopedPatientFilter = (req: any) => {
   if (req.user.role === Roles.DOCTOR) return { assignedDoctor: req.user.doctorId };
   if (req.user.role === Roles.PATIENT) return { _id: req.user.patientId };
@@ -51,7 +57,7 @@ export const listPatients = asyncHandler(async (req, res) => {
   const searchFilter = buildSearchFilter(req.query.search, ['fullName', 'phone', 'nationalId', 'email']);
   const filter = { ...searchFilter, ...scopedPatientFilter(req), archived: req.query.archived === 'true' ? true : false };
   const [items, total] = await Promise.all([
-    PatientModel.find(filter).populate('assignedDoctor').sort(sort).skip(skip).limit(limit),
+    PatientModel.find(filter).populate(assignedDoctorPopulate).sort(sort).skip(skip).limit(limit),
     PatientModel.countDocuments(filter)
   ]);
   return sendSuccess(res, { items, meta: { page, limit, total, pages: Math.ceil(total / limit) } }, 'Patients list');
@@ -59,7 +65,7 @@ export const listPatients = asyncHandler(async (req, res) => {
 
 export const getPatient = asyncHandler(async (req, res) => {
   await ensureCanViewPatient(req, req.params.id);
-  const patient = await PatientModel.findById(req.params.id).populate('assignedDoctor').populate('user', '-password');
+  const patient = await PatientModel.findById(req.params.id).populate(assignedDoctorPopulate).populate('user', '-password');
   if (!patient) throw new ApiError(404, 'Patient not found');
   return sendSuccess(res, patient, 'Patient details');
 });
@@ -81,7 +87,8 @@ export const createPatient = asyncHandler(async (req, res) => {
 
   const patient = await PatientModel.create({ ...req.body, user: userId });
   await writeAuditLog(req, 'create', 'Patient', patient._id.toString());
-  return sendSuccess(res, patient, 'Patient created successfully', 201);
+  const populated = await PatientModel.findById(patient._id).populate(assignedDoctorPopulate).populate('user', '-password');
+  return sendSuccess(res, populated, 'Patient created successfully', 201);
 });
 
 export const updatePatient = asyncHandler(async (req, res) => {
@@ -90,14 +97,16 @@ export const updatePatient = asyncHandler(async (req, res) => {
   const patient = await PatientModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   if (!patient) throw new ApiError(404, 'Patient not found');
   await writeAuditLog(req, 'update', 'Patient', req.params.id);
-  return sendSuccess(res, patient, 'Patient updated successfully');
+  const populated = await PatientModel.findById(patient._id).populate(assignedDoctorPopulate).populate('user', '-password');
+  return sendSuccess(res, populated, 'Patient updated successfully');
 });
 
 export const archivePatient = asyncHandler(async (req, res) => {
   const patient = await PatientModel.findByIdAndUpdate(req.params.id, { archived: true }, { new: true });
   if (!patient) throw new ApiError(404, 'Patient not found');
   await writeAuditLog(req, 'archive', 'Patient', req.params.id);
-  return sendSuccess(res, patient, 'Patient archived successfully');
+  const populated = await PatientModel.findById(patient._id).populate(assignedDoctorPopulate).populate('user', '-password');
+  return sendSuccess(res, populated, 'Patient archived successfully');
 });
 
 export const deletePatient = asyncHandler(async (req, res) => {

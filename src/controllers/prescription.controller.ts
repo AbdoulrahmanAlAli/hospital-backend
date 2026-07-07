@@ -125,7 +125,7 @@ export const getPrescription = asyncHandler(async (req, res) => {
 
 export const listPatientPrescriptions = asyncHandler(async (req, res) => {
   await ensureCanViewPatient(req, req.params.patientId);
-  const items = await PrescriptionModel.find({ patient: req.params.patientId }).populate('doctor').populate('medicines.medicine').sort('-issuedAt');
+  const items = await PrescriptionModel.find({ patient: req.params.patientId }).populate({ path: 'doctor', populate: { path: 'user', select: 'name email phone' } }).populate('medicines.medicine').sort('-issuedAt');
   return sendSuccess(res, items, 'Patient prescriptions');
 });
 
@@ -144,7 +144,8 @@ export const createPatientPrescription = asyncHandler(async (req, res) => {
   }
 
   await writeAuditLog(req, 'create', 'Prescription', prescription._id.toString());
-  return sendSuccess(res, prescription, 'Prescription created successfully', 201);
+  const populated = await populatePrescriptionQuery(PrescriptionModel.findById(prescription._id));
+  return sendSuccess(res, populated, 'Prescription created successfully', 201);
 });
 
 export const updatePatientPrescription = asyncHandler(async (req, res) => {
@@ -156,7 +157,8 @@ export const updatePatientPrescription = asyncHandler(async (req, res) => {
   );
   if (!prescription) throw new ApiError(404, 'Prescription not found');
   await writeAuditLog(req, 'update', 'Prescription', prescription._id.toString());
-  return sendSuccess(res, prescription, 'Prescription updated successfully');
+  const populated = await populatePrescriptionQuery(PrescriptionModel.findById(prescription._id));
+  return sendSuccess(res, populated, 'Prescription updated successfully');
 });
 
 export const deletePatientPrescription = asyncHandler(async (req, res) => {
