@@ -92,6 +92,33 @@ Example create/update body:
 ```
 
 
+
+## Medical Tests General API
+
+A general medical tests endpoint was added for dashboard/admin views:
+
+```http
+GET /api/v1/tests
+```
+
+Access behavior:
+
+- `manager`, `admin`, and `staff`: can view all medical tests.
+- `doctor`: can view only tests created by the logged-in doctor.
+- `patient`: can view only tests linked to the logged-in patient profile.
+
+Optional filters:
+
+```http
+GET /api/v1/tests?page=1&limit=10&search=&patient=PATIENT_ID&doctor=DOCTOR_ID&type=Blood%20Test&status=completed&from=2026-01-01&to=2026-12-31
+```
+
+The patient-specific endpoint remains available for patient profile pages:
+
+```http
+GET /api/v1/patients/:patientId/tests
+```
+
 ## Prescriptions General API
 
 A general prescriptions endpoint was added for dashboard/admin views:

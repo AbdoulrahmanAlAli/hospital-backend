@@ -1,8 +1,9 @@
 import path from 'path';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+import type { FilterQuery } from 'mongoose';
 import { Roles } from '../constants/roles';
-import { MedicalTestModel } from '../models/MedicalTest.model';
+import { MedicalTestModel, type IMedicalTest } from '../models/MedicalTest.model';
 import { PatientModel } from '../models/Patient.model';
 import { NotificationModel } from '../models/Notification.model';
 import { ApiError } from '../utils/ApiError';
@@ -30,6 +31,109 @@ const doctorPopulate = {
   path: 'doctor',
   populate: { path: 'user', select: 'name email phone' }
 };
+
+const testPopulate = [
+  {
+    path: 'patient',
+    populate: [
+      { path: 'user', select: 'name email phone' },
+      { path: 'assignedDoctor', populate: { path: 'user', select: 'name email phone' } }
+    ]
+  },
+  doctorPopulate
+];
+
+const populateTestQuery = <T extends { populate: (path: any) => T }>(query: T): T => {
+  let populated = query;
+  for (const populateOption of testPopulate) {
+    populated = populated.populate(populateOption);
+  }
+  return populated;
+};
+
+const applyMedicalTestFilters = (filter: FilterQuery<IMedicalTest>, query: Record<string, unknown>) => {
+  if (typeof query.patient === 'string' && query.patient.trim()) {
+    filter.patient = query.patient.trim();
+  }
+
+  if (typeof query.doctor === 'string' && query.doctor.trim()) {
+    filter.doctor = query.doctor.trim();
+  }
+
+  if (typeof query.status === 'string' && query.status.trim()) {
+    filter.status = query.status.trim();
+  }
+
+  if (typeof query.type === 'string' && query.type.trim()) {
+    filter.type = query.type.trim();
+  }
+
+  const requestedAt: Record<string, Date> = {};
+  if (typeof query.from === 'string' && query.from.trim()) {
+    requestedAt.$gte = new Date(query.from);
+  }
+  if (typeof query.to === 'string' && query.to.trim()) {
+    requestedAt.$lte = new Date(query.to);
+  }
+  if (Object.keys(requestedAt).length > 0) {
+    filter.requestedAt = requestedAt;
+  }
+
+  if (typeof query.search === 'string' && query.search.trim()) {
+    const search = new RegExp(query.search.trim(), 'i');
+    filter.$or = [{ title: search }, { type: search }, { resultSummary: search }];
+  }
+};
+
+export const listMedicalTests = asyncHandler(async (req, res) => {
+  if (!req.user) throw new ApiError(401, 'Authentication required');
+
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+  const skip = (page - 1) * limit;
+  const sortValue = typeof req.query.sort === 'string' && req.query.sort.trim() ? req.query.sort : '-requestedAt';
+  const filter: FilterQuery<IMedicalTest> = {};
+
+  if ([Roles.MANAGER, Roles.ADMIN, Roles.STAFF].includes(req.user.role as any)) {
+    applyMedicalTestFilters(filter, req.query as Record<string, unknown>);
+  } else if (req.user.role === Roles.DOCTOR && req.user.doctorId) {
+    filter.doctor = req.user.doctorId;
+    if (typeof req.query.patient === 'string' && req.query.patient.trim()) {
+      filter.patient = req.query.patient.trim();
+    }
+    if (typeof req.query.status === 'string' && req.query.status.trim()) {
+      filter.status = req.query.status.trim();
+    }
+    if (typeof req.query.type === 'string' && req.query.type.trim()) {
+      filter.type = req.query.type.trim();
+    }
+    if (typeof req.query.search === 'string' && req.query.search.trim()) {
+      const search = new RegExp(req.query.search.trim(), 'i');
+      filter.$or = [{ title: search }, { type: search }, { resultSummary: search }];
+    }
+  } else if (req.user.role === Roles.PATIENT && req.user.patientId) {
+    filter.patient = req.user.patientId;
+    if (typeof req.query.status === 'string' && req.query.status.trim()) {
+      filter.status = req.query.status.trim();
+    }
+    if (typeof req.query.type === 'string' && req.query.type.trim()) {
+      filter.type = req.query.type.trim();
+    }
+  } else {
+    throw new ApiError(403, 'You do not have permission to view medical tests');
+  }
+
+  const [items, total] = await Promise.all([
+    populateTestQuery(MedicalTestModel.find(filter)).sort(sortValue).skip(skip).limit(limit),
+    MedicalTestModel.countDocuments(filter)
+  ]);
+
+  return sendSuccess(
+    res,
+    { items, meta: { page, limit, total, pages: Math.ceil(total / limit) } },
+    'Medical tests list'
+  );
+});
 
 export const listPatientTests = asyncHandler(async (req, res) => {
   await ensureCanViewPatient(req, req.params.patientId);

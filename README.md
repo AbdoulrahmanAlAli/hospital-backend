@@ -75,7 +75,7 @@ docs/Hospital_Management_Backend.postman_environment.json
 6. سيحفظ Postman تلقائياً `accessToken` و `refreshToken`.
 7. بعدها يمكنك تنفيذ باقي الطلبات بالترتيب، مثل إنشاء Doctor ثم Patient ثم Medical Test.
 
-الـ Collection تحتوي 73 Request موزعة على مجلدات: Auth, Users, Doctors, Staff, Patients, Medical Tests, Prescriptions, Appointments, Billing, Notifications, Medicines, Inventory, Equipment, Shifts.
+الـ Collection تحتوي 74 Request موزعة على مجلدات: Auth, Users, Doctors, Staff, Patients, Medical Tests, Prescriptions, Appointments, Billing, Notifications, Medicines, Inventory, Equipment, Shifts.
 
 ## متغيرات البيئة المهمة
 
@@ -204,6 +204,7 @@ GET    /api/v1/patients/:id
 PATCH  /api/v1/patients/:id
 PATCH  /api/v1/patients/:id/archive
 
+GET    /api/v1/tests
 GET    /api/v1/patients/:patientId/tests
 POST   /api/v1/patients/:patientId/tests
 PATCH  /api/v1/patients/:patientId/tests/:testId
@@ -272,6 +273,33 @@ Example:
 }
 ```
 
+
+
+## التحاليل العامة للأدمن
+
+تمت إضافة endpoint عام لعرض كل التحاليل في لوحة الإدارة:
+
+```http
+GET /api/v1/tests
+```
+
+الصلاحيات:
+
+- `manager` و `admin` و `staff`: يمكنهم عرض كل التحاليل.
+- `doctor`: يرى التحاليل التي أنشأها هو فقط.
+- `patient`: يرى تحاليله فقط.
+
+فلترة اختيارية:
+
+```http
+GET /api/v1/tests?page=1&limit=10&search=&patient=PATIENT_ID&doctor=DOCTOR_ID&type=Blood%20Test&status=completed&from=2026-01-01&to=2026-12-31
+```
+
+الرابط القديم بقي موجوداً لصفحة ملف مريض محدد:
+
+```http
+GET /api/v1/patients/:patientId/tests
+```
 
 
 ## وصفات عامة للأدمن

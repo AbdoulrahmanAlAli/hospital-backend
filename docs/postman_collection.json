@@ -666,6 +666,16 @@
       "description": "",
       "item": [
         {
+          "name": "List All Medical Tests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tests?page=1&limit=10&search=&patient=&doctor=&type=&status=",
+            "description": "General medical tests list. manager/admin/staff can view all tests; doctor sees own tests; patient sees own tests. Optional filters: patient, doctor, type, status, from, to, search."
+          },
+          "response": []
+        },
+        {
           "name": "List Patient Tests",
           "request": {
             "method": "GET",
