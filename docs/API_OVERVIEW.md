@@ -95,7 +95,7 @@ Example create/update body:
 
 ## Medical Tests General API
 
-A general medical tests endpoint was added for dashboard/admin views:
+A general medical tests endpoint is available for doctors and patients only. It is not available for manager, admin, or staff accounts:
 
 ```http
 GET /api/v1/tests
@@ -103,9 +103,9 @@ GET /api/v1/tests
 
 Access behavior:
 
-- `manager`, `admin`, and `staff`: can view all medical tests.
-- `doctor`: can view only tests created by the logged-in doctor.
+- `doctor`: can view only tests created by the logged-in doctor and can create/update/upload test files for assigned patients.
 - `patient`: can view only tests linked to the logged-in patient profile.
+- `manager`, `admin`, and `staff`: cannot view or follow medical tests.
 
 Optional filters:
 

@@ -10,7 +10,7 @@ import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { sendSuccess } from '../utils/apiResponse';
 import { decryptStoredFile, encryptAndStoreFile } from '../utils/fileCrypto';
-import { ensureAssignedDoctorForPatient, ensureCanViewPatient, getPatientOrThrow } from '../services/patientAccess.service';
+import { ensureAssignedDoctorForPatient, ensureCanViewPatientMedicalTests, getPatientOrThrow } from '../services/patientAccess.service';
 import { writeAuditLog } from '../middlewares/audit.middleware';
 
 export const createMedicalTestSchema = z.object({
@@ -94,9 +94,7 @@ export const listMedicalTests = asyncHandler(async (req, res) => {
   const sortValue = typeof req.query.sort === 'string' && req.query.sort.trim() ? req.query.sort : '-requestedAt';
   const filter: FilterQuery<IMedicalTest> = {};
 
-  if ([Roles.MANAGER, Roles.ADMIN, Roles.STAFF].includes(req.user.role as any)) {
-    applyMedicalTestFilters(filter, req.query as Record<string, unknown>);
-  } else if (req.user.role === Roles.DOCTOR && req.user.doctorId) {
+  if (req.user.role === Roles.DOCTOR && req.user.doctorId) {
     filter.doctor = req.user.doctorId;
     if (typeof req.query.patient === 'string' && req.query.patient.trim()) {
       filter.patient = req.query.patient.trim();
@@ -136,7 +134,7 @@ export const listMedicalTests = asyncHandler(async (req, res) => {
 });
 
 export const listPatientTests = asyncHandler(async (req, res) => {
-  await ensureCanViewPatient(req, req.params.patientId);
+  await ensureCanViewPatientMedicalTests(req, req.params.patientId);
   const tests = await MedicalTestModel.find({ patient: req.params.patientId })
     .populate(doctorPopulate)
     .sort('-createdAt');
@@ -209,7 +207,7 @@ export const uploadPatientTestPdf = asyncHandler(async (req, res) => {
 });
 
 export const viewPatientTestPdf = asyncHandler(async (req, res) => {
-  await ensureCanViewPatient(req, req.params.patientId);
+  await ensureCanViewPatientMedicalTests(req, req.params.patientId);
   const test = await MedicalTestModel.findOne({ _id: req.params.testId, patient: req.params.patientId });
   if (!test) throw new ApiError(404, 'Medical test not found');
   if (!test.pdfFile) throw new ApiError(404, 'No PDF file is attached to this test');

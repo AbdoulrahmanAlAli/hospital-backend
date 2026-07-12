@@ -22,6 +22,17 @@ export const ensureCanViewPatient = async (req: Request, patientId: string): Pro
   throw new ApiError(403, 'You do not have permission to access this patient');
 };
 
+
+export const ensureCanViewPatientMedicalTests = async (req: Request, patientId: string): Promise<void> => {
+  if (!req.user) throw new ApiError(401, 'Authentication required');
+  const patient = await getPatientOrThrow(patientId);
+
+  if (req.user.role === Roles.DOCTOR && req.user.doctorId === patient.assignedDoctor.toString()) return;
+  if (req.user.role === Roles.PATIENT && req.user.patientId === patient._id.toString()) return;
+
+  throw new ApiError(403, 'Only the assigned doctor or the patient can view medical tests');
+};
+
 export const ensureAssignedDoctorForPatient = async (req: Request, patientId: string): Promise<void> => {
   if (!req.user) throw new ApiError(401, 'Authentication required');
   if (req.user.role !== Roles.DOCTOR || !req.user.doctorId) {

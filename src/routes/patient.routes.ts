@@ -19,11 +19,11 @@ router.patch('/:id', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF, Roles.DO
 router.patch('/:id/archive', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF), patientController.archivePatient);
 router.delete('/:id', authorize(Roles.MANAGER, Roles.ADMIN), patientController.deletePatient);
 
-router.get('/:patientId/tests', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF, Roles.DOCTOR, Roles.PATIENT), testController.listPatientTests);
+router.get('/:patientId/tests', authorize(Roles.DOCTOR, Roles.PATIENT), testController.listPatientTests);
 router.post('/:patientId/tests', authorize(Roles.DOCTOR), validate(testController.createMedicalTestSchema), testController.createPatientTest);
 router.patch('/:patientId/tests/:testId', authorize(Roles.DOCTOR), validate(testController.updateMedicalTestSchema), testController.updatePatientTest);
 router.post('/:patientId/tests/:testId/pdf', authorize(Roles.DOCTOR), pdfUpload.single('pdf'), testController.uploadPatientTestPdf);
-router.get('/:patientId/tests/:testId/pdf', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF, Roles.DOCTOR, Roles.PATIENT), testController.viewPatientTestPdf);
+router.get('/:patientId/tests/:testId/pdf', authorize(Roles.DOCTOR, Roles.PATIENT), testController.viewPatientTestPdf);
 router.delete('/:patientId/tests/:testId', authorize(Roles.DOCTOR), testController.deletePatientTest);
 
 router.get('/:patientId/prescriptions', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF, Roles.DOCTOR, Roles.PATIENT), prescriptionController.listPatientPrescriptions);

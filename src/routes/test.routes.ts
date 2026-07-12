@@ -8,6 +8,6 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/', authorize(Roles.MANAGER, Roles.ADMIN, Roles.STAFF, Roles.DOCTOR, Roles.PATIENT), controller.listMedicalTests);
+router.get('/', authorize(Roles.DOCTOR, Roles.PATIENT), controller.listMedicalTests);
 
 export default router;
