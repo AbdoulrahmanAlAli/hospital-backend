@@ -328,3 +328,86 @@ GET /api/v1/prescriptions?page=1&limit=10&patient=PATIENT_ID&doctor=DOCTOR_ID&fr
 ```http
 GET /api/v1/patients/:patientId/prescriptions
 ```
+
+## Dashboard Overview API
+
+تمت إضافة API خاص بالصفحة الرئيسية للوحة الإدارة:
+
+```http
+GET /api/v1/dashboard/overview
+```
+
+الصلاحيات:
+
+- `manager`
+- `admin`
+- `staff`
+
+هذا الـ API يرجع في طلب واحد بيانات الصفحة الرئيسية، مثل:
+
+- إجمالي المرضى.
+- مواعيد اليوم.
+- الفواتير غير المدفوعة ومجموع قيمتها.
+- عدد الأطباء النشطين من إجمالي الأطباء.
+- حالة المواعيد حسب `pending`, `confirmed`, `completed`, `cancelled`.
+- عدد المواعيد في آخر 7 أيام.
+- الإيرادات الشهرية لآخر 6 أشهر.
+- تنبيهات المخزون للعناصر التي وصلت للحد الأدنى أو أقل.
+- آخر المواعيد مع اسم المريض واسم الطبيب.
+
+مثال:
+
+```http
+GET /api/v1/dashboard/overview
+Authorization: Bearer TOKEN
+```
+
+## Notifications Targeting
+
+تم تطوير نظام الإشعارات ليقبل الإرسال إلى شخص واحد، عدة أشخاص، أو فئة كاملة.
+
+### إرسال إشعار لشخص واحد
+
+```json
+{
+  "targetType": "user",
+  "recipient": "USER_ID",
+  "title": "Administrative notice",
+  "message": "This is a notification for one user",
+  "type": "administrative"
+}
+```
+
+### إرسال إشعار لعدة أشخاص
+
+```json
+{
+  "targetType": "users",
+  "recipients": ["USER_ID_1", "USER_ID_2"],
+  "title": "Administrative notice",
+  "message": "This notification is sent to selected users",
+  "type": "administrative"
+}
+```
+
+### إرسال إشعار لفئة كاملة
+
+```json
+{
+  "targetType": "role",
+  "role": "doctor",
+  "title": "Doctors announcement",
+  "message": "This notification is sent to all active doctors",
+  "type": "administrative"
+}
+```
+
+القيم المسموحة لـ `role`:
+
+- `manager`
+- `admin`
+- `staff`
+- `doctor`
+- `patient`
+
+إرسال الإشعار لفئة كاملة مسموح فقط لـ `manager` و `admin`.

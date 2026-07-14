@@ -263,6 +263,22 @@
       ]
     },
     {
+      "name": "02.5 - Dashboard",
+      "description": "Dashboard overview API for manager/admin/staff home page.",
+      "item": [
+        {
+          "name": "Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/overview",
+            "description": "Manager/admin/staff only. Returns summary cards, appointment charts, revenue, inventory alerts, and latest appointments."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "02 - Users",
       "description": "",
       "item": [
@@ -1095,7 +1111,7 @@
     },
     {
       "name": "10 - Notifications",
-      "description": "",
+      "description": "Notifications can target one user, multiple users, or a full role such as all doctors or all patients. Role broadcast is allowed for manager/admin only.",
       "item": [
         {
           "name": "My Notifications",
@@ -1103,12 +1119,12 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/notifications/me?page=1&limit=10&read=false",
-            "description": ""
+            "description": "Returns notifications for the currently logged-in user only."
           },
           "response": []
         },
         {
-          "name": "Create Notification",
+          "name": "Create Notification - Single User",
           "request": {
             "method": "POST",
             "header": [
@@ -1118,10 +1134,10 @@
               }
             ],
             "url": "{{baseUrl}}/notifications",
-            "description": "",
+            "description": "Send notification to one specific user.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"recipient\": \"{{currentUserId}}\",\n  \"title\": \"Administrative notice\",\n  \"message\": \"This is a test notification from Postman\",\n  \"type\": \"administrative\"\n}",
+              "raw": "{\n  \"targetType\": \"user\",\n  \"recipient\": \"{{currentUserId}}\",\n  \"title\": \"Administrative notice\",\n  \"message\": \"This is a test notification for one user\",\n  \"type\": \"administrative\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1129,21 +1145,55 @@
               }
             }
           },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const json = pm.response.json();",
-                  "if (json.data && json.data._id) {",
-                  "  pm.collectionVariables.set(\"notificationId\", json.data && json.data._id);",
-                  "}"
-                ]
+          "response": []
+        },
+        {
+          "name": "Create Notification - Multiple Users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications",
+            "description": "Send notification to multiple selected users.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"users\",\n  \"recipients\": [\n    \"{{currentUserId}}\"\n  ],\n  \"title\": \"Administrative notice\",\n  \"message\": \"This notification is sent to selected users\",\n  \"type\": \"administrative\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
               }
             }
-          ]
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification - Role Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/notifications",
+            "description": "Manager/admin only. Send notification to all active users under one role: manager, admin, staff, doctor, patient.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"role\",\n  \"role\": \"doctor\",\n  \"title\": \"Doctors announcement\",\n  \"message\": \"This notification is sent to all active doctors\",\n  \"type\": \"administrative\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
         },
         {
           "name": "Mark Notification As Read",
@@ -1151,7 +1201,7 @@
             "method": "PATCH",
             "header": [],
             "url": "{{baseUrl}}/notifications/{{notificationId}}/read",
-            "description": ""
+            "description": "Marks a notification as read only if it belongs to the current user."
           },
           "response": []
         }

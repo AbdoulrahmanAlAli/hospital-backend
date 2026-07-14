@@ -166,3 +166,79 @@ Example response shape:
   }
 }
 ```
+
+## Dashboard Overview API
+
+A dashboard overview endpoint is available for the main admin/staff home page:
+
+```http
+GET /api/v1/dashboard/overview
+```
+
+Allowed roles:
+
+- `manager`
+- `admin`
+- `staff`
+
+The response includes:
+
+- Total patients.
+- Today's appointments.
+- Unpaid bills count and total amount.
+- Active doctors count and total doctors.
+- Appointment status distribution.
+- Appointments count for the last 7 days.
+- Monthly revenue for the last 6 months.
+- Inventory low-stock alerts.
+- Latest appointments with patient and doctor names.
+
+## Notifications Targeting
+
+Notifications can now be sent to one user, multiple users, or a full role.
+
+### Single user
+
+```json
+{
+  "targetType": "user",
+  "recipient": "USER_ID",
+  "title": "Administrative notice",
+  "message": "This is a notification for one user",
+  "type": "administrative"
+}
+```
+
+### Multiple selected users
+
+```json
+{
+  "targetType": "users",
+  "recipients": ["USER_ID_1", "USER_ID_2"],
+  "title": "Administrative notice",
+  "message": "This notification is sent to selected users",
+  "type": "administrative"
+}
+```
+
+### Full role broadcast
+
+```json
+{
+  "targetType": "role",
+  "role": "doctor",
+  "title": "Doctors announcement",
+  "message": "This notification is sent to all active doctors",
+  "type": "administrative"
+}
+```
+
+Allowed role values:
+
+- `manager`
+- `admin`
+- `staff`
+- `doctor`
+- `patient`
+
+Role broadcast is allowed only for `manager` and `admin`.
